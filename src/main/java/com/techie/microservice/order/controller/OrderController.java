@@ -4,6 +4,7 @@ import com.techie.microservice.order.dto.OrderRequest;
 import com.techie.microservice.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,6 +21,12 @@ public class OrderController {
     public String placeOrder(@RequestBody OrderRequest request){
         orderService.placeOrder(request);
         return "Order placed Successfully";
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteAll(){
+        orderService.deleteAll();
+        return ResponseEntity.status(HttpStatus.OK).body("All orders are deleted !");
     }
 
     public OrderController(OrderService orderService) {
