@@ -7,6 +7,8 @@ import com.techie.microservice.order.productCl.ProductClient;
 import com.techie.microservice.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author HP
  **/
@@ -37,6 +39,7 @@ public class OrderService {
        if(isProductInStock){
            // todo : delete number of quantity ordred  from stockage !!
 
+
            // confirmer l'ordre
            Order order = Order.builder()
                    .id(request.id())
@@ -56,5 +59,9 @@ public class OrderService {
 
     public void deleteAll(){
         orderRepository.deleteAll();
+    }
+
+    public List<Order> findAll() {
+        return orderRepository.findAll();
     }
 }

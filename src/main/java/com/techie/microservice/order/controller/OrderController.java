@@ -1,11 +1,14 @@
 package com.techie.microservice.order.controller;
 
 import com.techie.microservice.order.dto.OrderRequest;
+import com.techie.microservice.order.model.Order;
 import com.techie.microservice.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author HP
@@ -29,6 +32,10 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body("All orders are deleted !");
     }
 
+    @GetMapping
+    public ResponseEntity<List<Order>> getAll(){
+        return ResponseEntity.ok(orderService.findAll());
+    }
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
