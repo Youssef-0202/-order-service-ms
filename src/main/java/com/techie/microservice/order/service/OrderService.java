@@ -1,10 +1,14 @@
 package com.techie.microservice.order.service;
 
 import com.techie.microservice.order.dto.OrderRequest;
+import com.techie.microservice.order.exception.InsufficientInventoryException;
+import com.techie.microservice.order.exception.InventoryNotFoundException;
+import com.techie.microservice.order.exception.ProductNotFoundException;
 import com.techie.microservice.order.inventoryCl.InventoryClient;
 import com.techie.microservice.order.model.Order;
 import com.techie.microservice.order.productCl.ProductClient;
 import com.techie.microservice.order.repository.OrderRepository;
+import feign.FeignException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,18 +34,21 @@ public class OrderService {
         boolean isProductIsExist = productClient.isExistBySkuCode(request.skuCode()).getBody();
 
         if (!isProductIsExist) {
-            throw new RuntimeException("Invalid product SKU: " + request.skuCode());
+           throw  new ProductNotFoundException(request.skuCode());
         }
 
-        // verifier si la quantitie demande est  existe
-        boolean isProductInStock = inventoryClient.isInStock(request.skuCode(), request.quantity());
+        // 2. Déduire directement la quantité (inventory-service gère tout)
+       try {
+           inventoryClient.updateBySkuCodeAfterOrder(request.skuCode(), request.quantity());
+       }catch (FeignException.NotFound ex){
+           throw new InventoryNotFoundException(ex.getMessage());
+       }catch (FeignException.BadRequest ex) {
+           String message = ex.contentUTF8();
+           throw new InsufficientInventoryException(message);
+       }
 
-       if(isProductInStock){
-           // todo : delete number of quantity ordred  from stockage !!
-
-
-           // confirmer l'ordre
-           Order order = Order.builder()
+        // 3. Créer et enregistrer la commande
+        Order order = Order.builder()
                    .id(request.id())
                    .orderNumber(request.orderNumber())
                    .price(request.price())
@@ -49,10 +56,7 @@ public class OrderService {
                    .skuCode(request.skuCode())
                    .build();
            orderRepository.save(order);
-       }
-       else {
-           throw new  RuntimeException("Quantity of product with SkuCode : " + request.skuCode() +" is not suffisant !!");
-       }
+
     }
 
 
