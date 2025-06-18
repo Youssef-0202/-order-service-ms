@@ -3,6 +3,7 @@ package com.techie.microservice.order.service;
 import com.techie.microservice.order.dto.OrderRequest;
 import com.techie.microservice.order.exception.InsufficientInventoryException;
 import com.techie.microservice.order.exception.InventoryNotFoundException;
+import com.techie.microservice.order.exception.OrderAlreadyExistException;
 import com.techie.microservice.order.exception.ProductNotFoundException;
 import com.techie.microservice.order.inventoryCl.InventoryClient;
 import com.techie.microservice.order.model.Order;
@@ -48,14 +49,24 @@ public class OrderService {
        }
 
         // 3. Créer et enregistrer la commande
-        Order order = Order.builder()
-                   .id(request.id())
-                   .orderNumber(request.orderNumber())
-                   .price(request.price())
-                   .quantity(request.quantity())
-                   .skuCode(request.skuCode())
-                   .build();
-           orderRepository.save(order);
+
+      if(!this.orderExistsByOrderNumber(request.orderNumber())){
+          Order order = Order.builder()
+                  .id(request.id())
+                  .orderNumber(request.orderNumber())
+                  .price(request.price())
+                  .quantity(request.quantity())
+                  .skuCode(request.skuCode())
+                  .build();
+          orderRepository.save(order);
+      }else {
+          throw new OrderAlreadyExistException(request.orderNumber());
+      }
+
+    }
+
+    public boolean orderExistsByOrderNumber(String orderNumber){
+        return   orderRepository.findByOrderNumber(orderNumber).isPresent();
 
     }
 

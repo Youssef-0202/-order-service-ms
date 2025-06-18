@@ -2,6 +2,7 @@ package com.techie.microservice.order.controller;
 
 import com.techie.microservice.order.exception.InsufficientInventoryException;
 import com.techie.microservice.order.exception.InventoryNotFoundException;
+import com.techie.microservice.order.exception.OrderAlreadyExistException;
 import com.techie.microservice.order.exception.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,16 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(OrderAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleOrderAlreadyExists(OrderAlreadyExistException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "Order Already Exists",
+                ex.getMessage(),
+                HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(InventoryNotFoundException.class)
