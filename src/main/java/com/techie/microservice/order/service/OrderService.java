@@ -9,8 +9,9 @@ import com.techie.microservice.order.inventoryCl.InventoryClient;
 import com.techie.microservice.order.model.Order;
 import com.techie.microservice.order.productCl.ProductClient;
 import com.techie.microservice.order.repository.OrderRepository;
-import feign.FeignException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
 
@@ -41,11 +42,14 @@ public class OrderService {
         // 2. Déduire directement la quantité (inventory-service gère tout)
        try {
            inventoryClient.updateBySkuCodeAfterOrder(request.skuCode(), request.quantity());
-       }catch (FeignException.NotFound ex){
+       }catch (HttpClientErrorException.NotFound ex){
            throw new InventoryNotFoundException(ex.getMessage());
-       }catch (FeignException.BadRequest ex) {
-           String message = ex.contentUTF8();
+       }catch (HttpClientErrorException.BadRequest ex) {
+           String message = ex.getResponseBodyAsString();
            throw new InsufficientInventoryException(message);
+       } catch (RestClientResponseException ex) {
+           // Other HTTP status errors (4xx, 5xx)
+           throw new RuntimeException("Inventory update failed: " + ex.getStatusText(), ex);
        }
 
         // 3. Créer et enregistrer la commande

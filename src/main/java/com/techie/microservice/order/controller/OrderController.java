@@ -17,7 +17,9 @@ import java.util.List;
 @RequestMapping("/api/order")
 public class OrderController {
     private final OrderService orderService;
-
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
@@ -35,8 +37,5 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<Order>> getAll(){
         return ResponseEntity.ok(orderService.findAll());
-    }
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
     }
 }
