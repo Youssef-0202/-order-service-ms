@@ -1,9 +1,6 @@
 package com.techie.microservice.order.controller;
 
-import com.techie.microservice.order.exception.InsufficientInventoryException;
-import com.techie.microservice.order.exception.InventoryNotFoundException;
-import com.techie.microservice.order.exception.OrderAlreadyExistException;
-import com.techie.microservice.order.exception.ProductNotFoundException;
+import com.techie.microservice.order.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
@@ -30,6 +27,7 @@ public class GlobalExceptionHandler {
     }
 
 
+
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleProductNotFound(ProductNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(
@@ -48,6 +46,17 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.value()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+
+    @ExceptionHandler(InventoryServiceUnavailableException.class)
+    public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleInventoryUnavailable(InventoryServiceUnavailableException ex) {
+        GlobalExceptionHandler.ErrorResponse error = new GlobalExceptionHandler.ErrorResponse(
+                "Inventory Service Unavailable",
+                ex.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE.value()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
     @ExceptionHandler(InventoryNotFoundException.class)

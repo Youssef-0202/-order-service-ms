@@ -1,0 +1,2 @@
+ALTER TABLE t_orders
+ADD COLUMN userEmail VARCHAR(255);
